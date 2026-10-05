@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS marts.daily_features (
+    ticker             TEXT             NOT NULL,
+    trade_date         DATE             NOT NULL,
+    adj_close          DOUBLE PRECISION NOT NULL,
+    volume             BIGINT,
+    ret                DOUBLE PRECISION,
+    spy_ret            DOUBLE PRECISION,
+    excess_ret         DOUBLE PRECISION,
+    next_excess_ret    DOUBLE PRECISION,
+    dgs2_chg_bp        DOUBLE PRECISION,
+    dgs10_chg_bp       DOUBLE PRECISION,
+    t10y2y_chg_bp      DOUBLE PRECISION,
+    dfii10_chg_bp      DOUBLE PRECISION,
+    hy_spread_chg_bp   DOUBLE PRECISION,
+    dff                DOUBLE PRECISION,
+    vix                DOUBLE PRECISION,
+    vix_chg            DOUBLE PRECISION,
+    news_count         INTEGER,
+    sentiment_mean     DOUBLE PRECISION,
+    negative_share     DOUBLE PRECISION,
+    built_at           TIMESTAMPTZ      NOT NULL DEFAULT now(),
+    PRIMARY KEY (ticker, trade_date)
+);
