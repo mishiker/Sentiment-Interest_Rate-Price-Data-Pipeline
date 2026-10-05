@@ -1,25 +1,16 @@
-import logging
-import os
 import json
+import logging
 import pandas as pd
 import yfinance as yf
-from dotenv import load_dotenv
 from datetime import date, datetime, timedelta, timezone
-from sqlalchemy import URL, MetaData, Table, create_engine, func, or_, select
+from sqlalchemy import MetaData, Table, func, or_, select
 from sqlalchemy.dialects.postgresql import insert
+from config import BENCHMARK, TICKERS
+from utils.db import get_engine
 
-load_dotenv()
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-TICKERS = [
-    "SPY",
-    "AAPL", "MSFT", "NVDA",  # technologia
-    "JPM", "BAC", "GS",      # banki
-    "O", "NEE", "DUK",       # REIT / utilities
-    "GME", "AMC",            # akcje memowe
-]
+PRICE_TICKERS = [BENCHMARK, *TICKERS]
 
 BACKFILL_START = date(2020, 1, 1)
 
@@ -55,7 +46,7 @@ def extract(tickers: list[str], start: date, end: date) -> dict[str, pd.DataFram
 
     available = set(df.columns.get_level_values(0))
     frames = {}
-    
+
     for ticker in tickers:
         if ticker not in available:
             log.warning("Brak danych dla %s", ticker)
@@ -66,9 +57,9 @@ def extract(tickers: list[str], start: date, end: date) -> dict[str, pd.DataFram
         if frame.empty:
             log.warning("Same puste wiersze dla %s", ticker)
             continue
-        
+
         frames[ticker] = frame
-    
+
     return frames
 
 
@@ -82,19 +73,6 @@ def _int(value):
 
 def to_payload(frame: pd.DataFrame) -> list[dict]:
     return json.loads(frame.reset_index().to_json(orient="records", date_format="iso"))
-
-
-def get_engine():
-    url = URL.create(
-        "postgresql+psycopg",
-        username=os.environ["POSTGRES_USER"],
-        password=os.environ["POSTGRES_PASSWORD"],
-        host=os.getenv("POSTGRES_HOST", "localhost"),
-        port=int(os.getenv("POSTGRES_PORT", "5432")),
-        database=os.environ["POSTGRES_DB"],
-    )
-    
-    return create_engine(url)
 
 
 def get_tables(engine) -> tuple[Table, Table]:
@@ -143,12 +121,12 @@ def to_rows(ticker: str, frame: pd.DataFrame, ingested_at: datetime) -> list[dic
 def build_upsert(stock_prices: Table):
     stmt = insert(stock_prices)
     changed = or_(*(stock_prices.c[f].is_distinct_from(stmt.excluded[f]) for f in PRICE_FIELDS))
-    
+
     return stmt.on_conflict_do_update(
         index_elements=["ticker", "price_date"],
         set_={f: stmt.excluded[f] for f in [*PRICE_FIELDS, "ingested_at"]},
         where=changed,
-    )
+    ).returning(stock_prices.c.price_date)
 
 
 def load(conn, stock_prices: Table, api_responses: Table,
@@ -174,7 +152,7 @@ def load(conn, stock_prices: Table, api_responses: Table,
     return total
 
 
-def run(tickers: list[str] = TICKERS) -> None:
+def run(tickers: list[str] = PRICE_TICKERS) -> None:
     ingested_at = datetime.now(timezone.utc)
     engine = get_engine()
     stock_prices, api_responses = get_tables(engine)
