@@ -126,12 +126,22 @@ GME and AMC are excluded from the chart because their 2021 meme rally makes rate
 
 Excess return over SPY for a +10 bp move in the 10Y Treasury yield, with 95% Newey–West confidence intervals.
 
-
 - **Bond proxies lose when rates rise.** Since 2022, NEE, O and DUK fall about 0.5-0.6% more than the market for every +10 bp, with tight intervals for all three.
 - **Banks still benefit, but much less.** BAC's sensitivity dropped from about +1.4% to +0.2% per 10 bp after 2022, consistent with the 2023 regional bank stress, when rising yields hurt bank bond portfolios.
 - **Big tech shows no excess sensitivity.** AAPL, MSFT and NVDA make up a large share of SPY, so their rate exposure is absorbed by the market factor.
 - **Robustness: generic market news does not dilute the signal.** Only 24–40% of big-tech headlines mention the company itself, yet restricting sentiment to those headlines does not systematically change the results. Banks even lose signal, because sector news matters to them.
 
+### Earnings surprises
+
+![Earnings event study](docs/earnings_event_study.png)
+
+- **Surprises move prices within two days.** Excluding meme stocks, the best quarter of a company
+  earns about 2.8 pp more excess return over days 0–1 than its worst quarter (p = 0.011,
+  ticker fixed effects, errors clustered by reaction date). Big tech reacts most strongly (5.6 pp, p = 0.027).
+- **No post-announcement drift.** Days 2-20 show no continuation and no reversal (p = 0.71),
+  consistent with the news results, information is priced in quickly for these liquid names.
+- **Meme stocks ignore fundamentals.** GME and AMC show no relation between surprise and reaction, the apparent drift in the full sample comes from a few short-squeeze episodes.
+- Surprise is measured as a within-ticker percentile rank, because Yahoo's percentage surprise explodes when the estimate is near zero and is not comparable for REITs, where analysts forecast FFO rather than EPS.
 
 ## Roadmap
 
