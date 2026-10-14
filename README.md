@@ -34,6 +34,8 @@ flowchart LR
     AF{{Airflow DAG<br/>daily 22:30 CET}} -.orchestrates.-> Sources
 ```
 
+
+
 The Airflow DAG runs every day after the US market close:
 
 ```text
@@ -42,7 +44,10 @@ fred ────┼──> features
 news ──> sentiment ──┘
 ```
 
+
+
 ## What it collects
+
 
 | Source   | Data                                                                                                     | History                    |
 | -------- | -------------------------------------------------------------------------------------------------------- | -------------------------- |
@@ -50,12 +55,19 @@ news ──> sentiment ──┘
 | FRED     | 2Y and 10Y Treasury yields, 10Y–2Y spread, 10Y real yield, Fed Funds rate, VIX, high-yield credit spread | since 2020                 |
 | Finnhub  | Company news headlines and summaries                                                                     | last 12 months (free plan) |
 
+
+
+
 ## Getting started
+
+
 
 ### Requirements
 
 - Docker Desktop with at least 6 GB of RAM assigned (FinBERT runs on CPU)
 - Free API keys: [FRED](https://fred.stlouisfed.org/docs/api/api_key.html) and [Finnhub](https://finnhub.io/register)
+
+
 
 ### 1. Configure
 
@@ -76,6 +88,8 @@ POSTGRES_DB=market_data
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 ```
+
+
 
 ### 2. Start the stack
 
@@ -102,13 +116,30 @@ python src/main.py prices fred         # selected steps
 
 Available steps: `prices`, `fred`, `news`, `sentiment`, `features`.
 
+## Results
+
+GME and AMC are excluded from the chart because their 2021 meme rally makes rate estimates meaningless, they are covered in the sentiment analysis.
+
+### Rate sensitivity
+
+![Rate sensitivity](docs/rate_sensitivity.png)
+
+Excess return over SPY for a +10 bp move in the 10Y Treasury yield, with 95% Newey–West confidence intervals.
+
+
+- **Bond proxies lose when rates rise.** Since 2022, NEE, O and DUK fall about 0.5-0.6% more than the market for every +10 bp, with tight intervals for all three.
+- **Banks still benefit, but much less.** BAC's sensitivity dropped from about +1.4% to +0.2% per 10 bp after 2022, consistent with the 2023 regional bank stress, when rising yields hurt bank bond portfolios.
+- **Big tech shows no excess sensitivity.** AAPL, MSFT and NVDA make up a large share of SPY, so their rate exposure is absorbed by the market factor.
+
+
+
 ## Roadmap
 
 - [x] Extract prices, rates and news with incremental, idempotent loads
 - [x] FinBERT news sentiment
 - [x] Daily features mart aligned to trading sessions
 - [x] Airflow orchestration in Docker
-- [ ] Rate sensitivity per stock (regressions with Newey–West errors, before and after 2022)
+- [x] Rate sensitivity per stock (regressions with Newey–West errors, before and after 2022)
 - [ ] Does sentiment predict next-day returns? (Granger tests, news volume as attention)
 - [ ] Market surprises: earnings vs consensus, yield moves on FOMC days
 - [ ] Factor importance with scikit-learn (time-series cross-validation, permutation importance)
