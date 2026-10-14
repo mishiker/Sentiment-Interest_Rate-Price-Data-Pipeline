@@ -6,6 +6,7 @@ from extract.news import run as run_news
 from extract.price import run as run_prices
 from transform.news_sentiment import run as run_news_sentiment
 from transform.daily_features import run as run_daily_features
+from extract.earnings import run as run_earnings
 
 log = logging.getLogger(__name__)
 
@@ -14,6 +15,7 @@ STEPS = {
     "fred": run_fred,
     "news": run_news,
     "sentiment": run_news_sentiment,
+    "earnings": run_earnings,
     "features": run_daily_features,
 }
 
