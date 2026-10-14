@@ -44,5 +44,12 @@ with DAG(
         bash_command=f"{PIPELINE} features",
         execution_timeout=timedelta(minutes=15),
     )
+
+    earnings = BashOperator(
+        task_id="earnings",
+        bash_command=f"{PIPELINE} earnings",
+        execution_timeout=timedelta(minutes=15),
+    )
+
     news >> sentiment
     [prices, fred, sentiment] >> features
