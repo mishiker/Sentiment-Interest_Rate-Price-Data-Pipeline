@@ -130,7 +130,7 @@ Excess return over SPY for a +10 bp move in the 10Y Treasury yield, with 95% New
 - **Bond proxies lose when rates rise.** Since 2022, NEE, O and DUK fall about 0.5-0.6% more than the market for every +10 bp, with tight intervals for all three.
 - **Banks still benefit, but much less.** BAC's sensitivity dropped from about +1.4% to +0.2% per 10 bp after 2022, consistent with the 2023 regional bank stress, when rising yields hurt bank bond portfolios.
 - **Big tech shows no excess sensitivity.** AAPL, MSFT and NVDA make up a large share of SPY, so their rate exposure is absorbed by the market factor.
-
+- **Robustness: generic market news does not dilute the signal.** Only 24–40% of big-tech headlines mention the company itself, yet restricting sentiment to those headlines does not systematically change the results. Banks even lose signal, because sector news matters to them.
 
 
 ## Roadmap
