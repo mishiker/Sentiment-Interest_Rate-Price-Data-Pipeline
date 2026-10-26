@@ -2,7 +2,7 @@ import logging
 import pandas as pd
 from datetime import datetime, timezone
 from sqlalchemy import MetaData, Table, and_, delete, select
-from config import BENCHMARK, TICKERS
+from config import BENCHMARK, FOMC_DATES, TICKERS
 from transform.news_sentiment import MODEL
 from utils.db import get_engine
 
@@ -61,6 +61,12 @@ def price_features(conn, stock_prices: Table) -> tuple[pd.DataFrame, pd.Datetime
     return df, trading_days
 
 
+def fomc_sessions(trading_days: pd.DatetimeIndex) -> pd.DatetimeIndex:
+    # decyzja o 14:00 czasu NY trafia w bieżącą sesję, a ogłoszona w dzień bez handlu (15.03.2020) w następną
+    pos = trading_days.searchsorted(pd.DatetimeIndex(FOMC_DATES))
+    return trading_days[pos[pos < len(trading_days)]]
+
+
 def macro_features(conn, fred_observations: Table, trading_days: pd.DatetimeIndex) -> pd.DataFrame:
     query = select(fred_observations.c.series_id, fred_observations.c.obs_date, fred_observations.c.value)
     obs = pd.read_sql(query, conn, parse_dates=["obs_date"])
@@ -80,6 +86,7 @@ def macro_features(conn, fred_observations: Table, trading_days: pd.DatetimeInde
     macro["dff"] = levels["DFF"]
     macro["vix"] = levels["VIXCLS"]
     macro["vix_chg"] = levels["VIXCLS"].diff()
+    macro["fomc_day"] = trading_days.isin(fomc_sessions(trading_days))
 
     return macro.rename_axis("trade_date").reset_index()
 

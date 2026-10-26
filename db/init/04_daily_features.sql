@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS marts.daily_features (
     news_count         INTEGER,
     sentiment_mean     DOUBLE PRECISION,
     negative_share     DOUBLE PRECISION,
+    fomc_day           BOOLEAN          NOT NULL DEFAULT false,
     built_at           TIMESTAMPTZ      NOT NULL DEFAULT now(),
     PRIMARY KEY (ticker, trade_date)
 );
